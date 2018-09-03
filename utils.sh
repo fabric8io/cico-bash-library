@@ -59,7 +59,7 @@ function get_new_ver_from_tag() {
     # if the repo has no tags this command will fail
     git tag --sort version:refname | tail -1 > version.tmp
     tag=$(cat version.tmp)
-    if [ -z "$tag" ] then
+    if [ -z "$tag" ]; then
         local MAJOR=0
         local MINOR=0
         local PATCH=0
