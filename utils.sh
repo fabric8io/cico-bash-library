@@ -16,18 +16,18 @@ function setup_git_ssh() {
 
 function push_tag() {
     release_version=$1
-    git tag -fa v${releaseVersion} -m 'Release version ${releaseVersion}'
-    git push origin v${releaseVersion}
+    git tag -fa v${release_version} -m 'Release version ${release_version}'
+    git push origin v${release_version}
 }
 
 function setup_workspace_for_release() {
     git tag -d $(git tag)
     git fetch --tags
     if [ ! -z $use_git_tag_next_version ]; then
-        new_version=get_new_ver_from_tag
+        new_version=$(get_new_ver_from_tag)
         echo "New release version $new_version"
-        mvn -B -U versions:set -DnewVersion=${newVersion} $mvnExtraArgs
-        git commit -a -m 'release ${new_version}'
+        mvn -B -U versions:set -DnewVersion=${new_version} $mvnExtraArgs
+        git commit -a -m "release ${new_version}"
         push_tag $new_version
     else
         mvn -B build-helper:parse-version versions:set -DnewVersion=\\\${parsedVersion.majorVersion}.\\\${parsedVersion.minorVersion}.\\\${parsedVersion.nextIncrementalVersion} $mvnExtraArgs
@@ -50,7 +50,7 @@ function semver_parse_into() {
 }
 
 function get_new_ver_from_tag() {
-    version = '1.0.0'
+    version='1.0.0'
 
     # Set known prerelease prefixes, needed for the proper sort order in the next command
     git config versionsort.prereleaseSuffix -RC
@@ -59,7 +59,7 @@ function get_new_ver_from_tag() {
     # if the repo has no tags this command will fail
     git tag --sort version:refname | tail -1 > version.tmp
     tag=$(cat version.tmp)
-    if [ -z "$tag" ]; then
+    if [ ! -z "$tag" ]; then
         local MAJOR=0
         local MINOR=0
         local PATCH=0
@@ -92,10 +92,14 @@ function stage_sonatype_repo() {
 
 function stage_project() {
     setup_git_ssh
-    git remote set-url origin https://fabric8cd:${GH_TOKEN}@github.com/${project}.git
-    current_project_version=get_project_version
-    version=setup_workspace_for_release
-    repo_ids=stageSonatypeRepo
+    if [ -z $GH_USER ]; then
+        GH_USER=fabric8cd
+        echo $GH_USER
+    fi
+    git remote set-url origin https://${GH_USER}:${GH_TOKEN}@github.com/${project}.git
+    current_project_version=$(get_project_version)
+    version=$(setup_workspace_for_release)
+    repo_ids=$(stageSonatypeRepo)
     echo "$project,$version,$repo_ids"
 }
 
