@@ -99,7 +99,7 @@ function stage_project() {
     git remote set-url origin https://${GH_USER}:${GH_TOKEN}@github.com/${project}.git
     current_project_version=$(get_project_version)
     version=$(setup_workspace_for_release)
-    repo_ids=$(stageSonatypeRepo)
+    repo_ids=$(stage_sonatype_repo)
     echo "$project,$version,$repo_ids"
 }
 
