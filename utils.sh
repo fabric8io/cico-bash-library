@@ -23,7 +23,7 @@ function push_tag() {
 function setup_workspace_for_release() {
     git tag -d $(git tag)
     git fetch --tags
-    if [ ! -z $use_git_tag_next_version ] then
+    if [ ! -z $use_git_tag_next_version ]; then
         new_version=get_new_ver_from_tag
         echo "New release version $new_version"
         mvn -B -U versions:set -DnewVersion=${newVersion} $mvnExtraArgs
